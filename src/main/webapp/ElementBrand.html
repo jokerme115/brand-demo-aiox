@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <!--  css样式  -->
+    <style>
+        .el-table .warning-row {
+            background: oldlace;
+        }
+
+        .el-table .success-row {
+            background: #f0f9eb;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <!--  查询框-->
+    <el-form :inline="true" :model="brand2" class="demo-form-inline">
+        <el-form-item label="当前状态">
+            <el-select v-model="brand2.status" placeholder="当前状态">
+                <el-option label="启用" value="1"></el-option>
+                <el-option label="禁用" value="0"></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="企业名称">
+            <el-input v-model="brand2.companyName" placeholder="企业名称"></el-input>
+        </el-form-item>
+        <el-form-item label="品牌名称">
+            <el-input v-model="brand2.brandName" placeholder="品牌名称"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="onSubmit">查询</el-button>
+        </el-form-item>
+    </el-form>
+    <!--批量删除和新增按钮-->
+    <el-row>
+        <el-button type="danger" @click="deleteById" plain>批量删除</el-button>
+        <el-button type="primary" @click="dialogVisible=true; clear(brand)" plain>新增</el-button>
+    </el-row>
+
+    <!--添加菜单-->
+    <!--对话框-->
+    <el-dialog
+            title="添加品牌"
+            :visible.sync="dialogVisible"
+            width="30%">
+        <!--表单-->
+
+        <el-form ref="form" :model="brand" label-width="80px">
+            <el-form-item label="品牌名称">
+                <el-input v-model="brand.brandName"></el-input>
+            </el-form-item>
+            <el-form-item label="企业名称">
+                <el-input v-model="brand.companyName"></el-input>
+            </el-form-item>
+            <el-form-item label="排序">
+                <el-input v-model="brand.ordered"></el-input>
+            </el-form-item>
+            <el-form-item label="备注">
+                <el-input type="textarea" v-model="brand.description"></el-input>
+            </el-form-item>
+            <el-form-item label="状态">
+                <el-switch v-model="brand.status" active-value="1" inactive-value="0" ></el-switch>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="addSubmit">提交</el-button>
+                <el-button @click="dialogVisible=false">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+    <!--  表格框  -->
+    <template>
+        <el-table
+                :data="brands"
+                row-key="1"
+                border
+                style="width: 100%"
+                tooltip-effect="dark"
+                :row-class-name="tableRowClassName"
+                @selection-change="handleSelectionChange">
+            <el-table-column
+                    type="selection"
+                    width="55">
+            </el-table-column>
+            <el-table-column
+                    type="index"
+                    width="50">
+            </el-table-column>
+            <el-table-column
+                    prop="brandName"
+                    label="品牌名称"
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="companyName"
+                    label="企业名称"
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="ordered"
+                    label="排序"
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="status"
+                    label="当前状态"
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="address"
+                    label="操作"
+                    align="center">
+                <!--按钮-->
+
+                    <template slot-scope="scope">
+                        <el-button type="success"
+                                   @click="showById(scope.$index)">修改
+                        </el-button>
+                        <el-button type="danger"
+                                   @click="deleteByIdInt(scope.$index)">删除
+                        </el-button>
+                    </template>
+
+
+            </el-table-column>
+        </el-table>
+        <!--分页栏-->
+        <div class="block" style="text-align: center">
+            <el-pagination
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="currentPage"
+                    :page-sizes="[10, 20, 30, 40]"
+                    :page-size="10"
+                    layout="total, sizes, prev, pager, next, jumper"
+                    :total="totalCount">
+            </el-pagination>
+        </div>
+
+        <!--返回顶部-->
+        <el-backtop target=".page-component__scroll .el-scrollbar__wrap"></el-backtop>
+
+    </template>
+
+</div>
+
+<!--导入axios框架 vue2框架 element组件 以及css样式-->
+<script src="js/axios-0.18.0.js"></script>
+<script src="js/vue.js"></script>
+<script src="element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+
+<!--script代码区域-->
+<script>
+    new Vue({
+        el: "#app",
+        methods: {
+            //工具方法
+            //清空brand中数据
+            clear(brand) {
+                brand.status = '';
+                brand.brandName = '';
+                brand.companyName = '';
+                brand.id = '';
+                brand.ordered = '';
+                brand.description = '';
+            },
+            //页数改变
+            handleSizeChange(val) {
+                this.pageSize = val;
+                this.selectByPage(this.brand);
+            },
+            //当前页码改变
+            handleCurrentChange(val) {
+                this.currentPage = val;
+                this.selectByPage(this.brand);
+            },
+            //复选框选中后的方法
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            tableRowClassName({row, rowIndex}) {
+                if (rowIndex === 1) {
+                    return 'warning-row';
+                } else if (rowIndex === 3) {
+                    return 'success-row';
+                }
+                return '';
+            },
+
+        //1.查找
+            //查询分页的方法
+            selectByPage(_brand) {
+                //当页面完成之后,发送异步请求获取数据
+                let _this = this;
+                this.brand = _brand;
+                axios({
+                    method: "post",
+                    url: "http://localhost:8080/brand-demo-aiox/brand/selectByPageAndCondition?currentPage=" + _this.currentPage + "&pageSize=" + _this.pageSize,
+                    data: _brand
+                }).then(function (resp) {
+                    console.log(_this.brands);
+                    _this.brands = resp.data.rows;
+                    //设置总记录数
+                    _this.totalCount = resp.data.totalCount;
+                })
+            },
+            onSubmit() {
+                //提交查询操作
+                this.selectByPage(this.brand2);
+                //设置当前页为第一页
+                this.currentPage = 1;
+            },
+
+        //2.增加
+        //3.删除
+            //修改功能
+            showById(id) {
+                //将id改为数据库中的id
+                this.massage = "update";
+                id = this.brands[id].id;
+                let _this = this;
+                axios({
+                    method: "post",
+                    url: "http://localhost:8080/brand-demo-aiox/brand/selectById",
+                    data: id
+                }).then(function (resp) {
+                    _this.brand = resp.data;
+                    _this.dialogVisible = true;
+                })
+            },
+            //通过int删除
+            deleteByIdInt(id) {
+                //清空ints[]数组存放当前的id
+                this.flag = true;
+                this.ints[0] = this.brands[id].id;
+                this.deleteById();
+                this.flag = false;
+            },
+            //通过数组删除
+            deleteById() {
+                //弹出确认提示框
+                this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    if (!this.flag)
+                        for (let i = 0; i < this.multipleSelection.length; i++)
+                            this.ints[i] = this.multipleSelection[i].id;
+                    console.log(this.ints[0]);
+                    //发送ajax请求
+                    let _this = this;
+                    axios({
+                        method: "post",
+                        url: "http://localhost:8080/brand-demo-aiox/brand/deleteById",
+                        data: _this.ints
+                    }).then(function (resp) {
+                        if (resp.data === "success") {
+                            _this.clear(_this.brand);
+                            //重新查询数据
+                            _this.selectByPage(_this.brand);
+                            //添加成功弹窗
+                            //用户点击确认
+                            _this.$message({
+                                message: "删除成功",
+                                type: 'success'
+                            });
+                            _this.ints = []
+                        }
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                })
+            },
+
+            //4.修改
+
+            //当点击提交按钮(修改新增同一个)
+            addSubmit() {
+                if (this.massage === "update") {
+                    //修改axios
+                    let _this = this;
+                    axios({
+                        method: "post",
+                        url: "http://localhost:8080/brand-demo-aiox/brand/update",
+                        data: _this.brand
+                    }).then(function (resp) {
+                        if (resp.data === "success") {
+                            //添加成功
+                            //关闭窗口
+                            _this.dialogVisible = false;
+                            //重置brand数据
+                            _this.clear(_this.brand);
+                            //重新查询数据
+                            _this.selectByPage(_this.brand);
+                            //添加成功弹窗
+                            _this.$message({
+                                message: "修改成功",
+                                type: 'success'
+                            })
+                            //恢复默认的massage
+                            _this.massage = "add";
+                        }
+                    })
+                } else {
+                    //发送ajax的异步请求,添加数据
+                    //清空添加数据
+                    let _this = this;
+                    axios({
+                        method: "post",
+                        url: "http://localhost:8080/brand-demo-aiox/brand/add",
+                        data: _this.brand
+                    }).then(function (resp) {
+                        if (resp.data === "success") {
+                            //添加成功
+                            //关闭窗口
+                            _this.dialogVisible = false;
+                            //重置brand数据
+                            _this.clear(_this.brand);
+                            //重新查询数据
+                            _this.selectByPage(_this.brand);
+                            //添加成功弹窗
+                            _this.$message({
+                                message: "添加成功",
+                                type: 'success'
+                            })
+                        }
+                    })
+                }
+            }
+        },
+
+            data() {
+            return {
+                massage:'add',
+                //存放flag标志
+                flag: false,
+                //每页总数数
+                pageSize: 10,
+                //总记录数
+                totalCount: 5,
+                //当前页码
+                currentPage: 1,
+                //多选id数组
+                ints: [],
+                dialogVisible: false,
+                brands: [],
+                multipleSelection: [],
+                //查询栏brand
+                brand: {
+                    status: '',
+                    brandName: '',
+                    companyName: '',
+                    id: "",
+                    ordered: "",
+                    description: ""
+                },
+                //添加Brand
+                brand2: {
+                    status: '',
+                    brandName: '',
+                    companyName: '',
+                    id: "",
+                    ordered: "",
+                    description: ""
+                }
+            }
+        },
+        mounted() {
+            this.selectByPage(this.brand);
+        }
+    })
+</script>
+</body>
+</html>
