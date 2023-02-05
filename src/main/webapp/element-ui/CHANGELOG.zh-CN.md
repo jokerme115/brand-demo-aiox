@@ -141,7 +141,7 @@
 - I18n
   - 更新加泰罗尼亚语翻译 (#14722 by @oscaralbareda)
   - 更新阿拉伯语翻译 (#16653 by @l3op)
-- Test
+- TestUser
   - 修复拼写错误 (#16672 by @boomler)
   - 优化 image 的单元测试 (#16847 by @a631807682)
 - Types

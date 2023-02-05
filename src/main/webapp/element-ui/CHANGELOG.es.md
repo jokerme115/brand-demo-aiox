@@ -142,7 +142,7 @@
   - Eliminada la traducción de 'year' en idioma Catalán como en otros idiomas (#14722 by @oscaralbareda)
   - Actualizado el changelog de las versiones 2.10.0 y 2.10.1 en Español (#16548 by @Gonzalo2310)
   - Actualizado ar.js (#16653 by @l3op)
-- Test
+- TestUser
   - Corregir error ortográfico (#16672 by @boomler)
   - Refractorizacion del unit test para usar data-uri (#16847 by @a631807682)
 - Types

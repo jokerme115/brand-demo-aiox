@@ -142,7 +142,7 @@
   - Remove translation of 'year' in catalan language as in the other languages (#14722 by @oscaralbareda)
   - Update spanish changelog 2.10.0 and 2.10.1 (#16548 by @Gonzalo2310)
   - Update ar.js (#16653 by @l3op)
-- Test
+- TestUser
   - Correct spelling error (#16672 by @boomler)
   - Refactor unit test to use data-uri (#16847 by @a631807682)
 - Types
