@@ -1,8 +1,10 @@
 import java.util.Scanner;
+import java.util.regex.Pattern;
+import java.util.regex.*;
 
 public class TestUser {
     @org.junit.Test
-    public void TestLogin(){
+    public void TestLogin() {
         String userName;
         String passWord;
         Scanner scanner = new Scanner(System.in);
@@ -15,4 +17,19 @@ public class TestUser {
 
 
     }
+
+    @org.junit.Test
+    public void TestUserName() {
+
+
+        final String content = "Aa011111111";
+
+        final String pattern = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}$";
+
+        boolean isMatch = Pattern.matches(pattern, content);
+        System.out.println("×Ö·û´®ÖÐÊÇ·ñ°üº¬ÁË 'runoob' ×Ó×Ö·û´®? " + isMatch);
+    }
+
 }
+
+

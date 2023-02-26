@@ -1,8 +1,6 @@
 package com.HeTao.service;
 
 import com.HeTao.pojo.User;
-import com.HeTao.util.SqlSessionFactoryUtils;
-import org.apache.ibatis.session.SqlSessionFactory;
 
 public interface UserService {
     /**
@@ -11,4 +9,11 @@ public interface UserService {
      * @return 返回对象如果对象存在
      */
     User select(User user);
+
+    /**
+     * 注册功能,通过用户名密码注册
+     * @param user 封装用户名和密码
+     */
+    void add(User user);
+
 }

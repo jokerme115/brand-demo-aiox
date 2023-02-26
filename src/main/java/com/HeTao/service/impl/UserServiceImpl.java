@@ -18,4 +18,18 @@ public class UserServiceImpl implements UserService {
         sqlSession.close();
         return user1;
     }
+
+    @Override
+    public void add(User user) {
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+
+
+        mapper.add(user);
+
+        sqlSession.commit();
+        sqlSession.close();
+    }
+
+
 }

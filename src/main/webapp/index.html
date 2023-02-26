@@ -17,11 +17,11 @@
                 <h2 class="title">Sign in</h2>
                 <div class="input-field">
                     <i class="fas fa-user"></i>
-                    <input v-model="username" type="text" placeholder="Username"></input>
+                    <input v-model="user_login.username" type="text" placeholder="Username"></input>
                 </div>
                 <div class="input-field">
                     <i class="fas fa-lock"></i>
-                    <input v-model="password" type="password" placeholder="Password"></input>
+                    <input v-model="user_login.password" type="password" placeholder="Password"></input>
                 </div>
                 <input type="submit" value="Login" class="btn solid" @click="login()"></input>
             </form>
@@ -30,17 +30,21 @@
                 <h2 class="title">Sign up</h2>
                 <div class="input-field">
                     <i class="fas fa-user"></i>
-                    <input v-model="username" type="text" placeholder="Username"></input>
+                    <el-tooltip class="item" effect="dark" content="5-16位用户名仅能包含[A-Z][a-z][0-9][- _]" placement="right" hide-after="0">
+                        <input v-model="user_register.username" type="text" placeholder="Username" @blur="userNameJust()"></input>
+                    </el-tooltip>
                 </div>
                 <div class="input-field">
                     <i class="fas fa-lock"></i>
-                    <input v-model="password" type="password" placeholder="Password"></input>
+                    <el-tooltip class="item" effect="dark" content="9-17位密码密码同时包含大小写、数字、字符(,.!@#)" placement="right" hide-after="0">
+                    <input v-model="user_register.password" type="password" placeholder="Password" @blur="passwordJust()"></input>
+                    </el-tooltip>
                 </div>
                 <div class="input-field">
                     <i class="fas fa-envelope"></i>
-                    <input v-model="checkCode" type="text" placeholder="Verification Code"></input>
+                    <input v-model="user_register.checkCode" type="text" placeholder="Verification Code"></input>
                 </div>
-                <span><img style="text-align: end" id="checkCodeImg" src="images/img.png">
+                <span><img style="text-align: end" id="checkCodeImg" src="/brand-demo-aiox/User/checkCode">
                     <a href="#" id="changeImg">看不清？</a>
               </span>
                 <input type="submit" class="btn" value="Sign up" @click="register()"></input>
@@ -88,43 +92,135 @@
 <script>
     new Vue({
         el: "#app",
-
-        methods:{
-            login(){
+        methods: {
+            login() {
                 let _this = this;
                 axios({
-                    method: "get",
-                    url: "http://localhost:8080/brand-demo-aiox/User/login?username="+_this.username+"&password="+_this.password,
+                    method: "post",
+                    url: "http://localhost:8080/brand-demo-aiox/User/login",
+                    data: _this.user_login
                 }).then(function (resp) {
-                    if (resp.data)
-                    {
-                        console.log("已找到");
-                    }else {
-                        console.log("未找到");
+                    if (resp.data === "success") {
+                        _this.$message({
+                            message: '登录成功',
+                            type: 'success'});
+
+                        window.location.href="ElementBrand.html"
+                    } else {
+                        _this.$message({
+                            message: '账号或密码错误',
+                            type: 'warning'
+                        });
                     }
                 })
             },
-            register(){
-                axios({
+            register() {
+                if (this.user_register.username === "" || this.user_register.username == null) {
+                    this.$message.error('请输入用户名');
+                    return;
+                } else if(this.user_register.password === "" || this.user_register.password == null) {
+                    this.$message.error('请输入密码');
+                    return;
+                } else if(this.user_register.checkCode === "" || this.user_register.checkCode == null) {
+                    this.$message.error('请输入验证码');
+                    return;
+                }
 
-                })
+                if (!this.usernameRegister){
+                    this.$message.error("用户名仅能包含[A-Z][a-z][0-9][- _] 5-16位");
+                }else if (!this.passwordRegister){
+                    this.$message.error("9-17位密码密码同时包含大小写、数字、字符(,.!@#)");
+                }else {
+                    let _this = this;
+                    axios({
+                        method: "post",
+                        url: "http://localhost:8080/brand-demo-aiox/User/register",
+                        data: _this.user_register
+                    }).then(function (resp) {
+                        if (resp.data === "success") {
+                            _this.$message({
+                                message: '注册成功',
+                                type: 'success'
+                            });
+
+                            _this.user_register.username = '';
+                            _this.user_register.password = '';
+                            _this.user_register.checkCode= '';
+
+
+                        } else if (resp.data === "checkCode Fail") {
+                            _this.$message({
+                                message: '验证码错误请重试',
+                                type: 'warning'
+                            });
+                            _this.user_register.checkCode = '';
+                            document.getElementById("checkCodeImg").src = "/brand-demo-aiox/User/checkCode?" + new Date().getMilliseconds();
+                        } else {
+                            _this.$message({
+                                message: '注册失败',
+                                type: 'warning'
+                            });
+                        }
+                    })
+                }
+
+            },
+            userNameJust(){
+                let patten = /[a-zA-Z0-9_]{4,15}/g;
+                if (!patten.test(this.user_register.username))
+                {
+                    this.$message({
+                        message: '用户名仅能包含[A-Z][a-z][0-9][- _] 5-16位',
+                        type: 'warning'
+                    })
+                    this.usernameRegister = false;
+                }else {
+                    this.usernameRegister = true;
+                }
+            },
+            passwordJust(){
+                let patten = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}/g;
+                if (!patten.test(this.user_register.username))
+                {
+                    this.$message({
+                        message: '9-17位密码密码同时包含大小写、数字、字符(,.!@#)',
+                        type: 'warning'
+                    })
+                    this.passwordRegister = false;
+                }else {
+                    this.passwordRegister = true;
+                }
             }
         },
 
-        data(){
-            return{
+        data() {
+            return {
+                value: '',
+                usernameRegister : true,
+                passwordRegister : true,
                 username: '',
                 password: '',
                 checkCode: '',
-                user:{
+                user_login: {
                     username: '',
                     password: ''
+                },
+                user_register: {
+                    username: '',
+                    password: '',
+                    checkCode: ''
                 }
             }
         }
 
     })
 
+    document.getElementById("changeImg").onclick = function () {
+        document.getElementById("checkCodeImg").src = "/brand-demo-aiox/User/checkCode?" + new Date().getMilliseconds();
+    }
+    document.getElementById("checkCodeImg").onclick = function () {
+        document.getElementById("checkCodeImg").src = "/brand-demo-aiox/User/checkCode?" + new Date().getMilliseconds();
+    }
 
 </script>
 

@@ -5,10 +5,19 @@ public class User {
     private Integer id;
     private String username;
     private String password;
+    private String checkCode;
 
-    public User(String username, String password) {
+    public User(String username, String password, String checkCode) {
         this.username = username;
         this.password = password;
+        this.checkCode = checkCode;
+    }
+    public String getCheckCode() {
+        return checkCode;
+    }
+
+    public void setCheckCode(String checkCode) {
+        this.checkCode = checkCode;
     }
 
     public Integer getId() {
