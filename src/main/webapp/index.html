@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="css/style.css"/>
     <title>Sign in & Sign up Form</title>
 </head>
-<body>
+<body  onload = "autoFill()">
 <div class="container">
     <div class="forms-container" id="app">
         <div class="signin-signup">
@@ -17,11 +17,14 @@
                 <h2 class="title">Sign in</h2>
                 <div class="input-field">
                     <i class="fas fa-user"></i>
-                    <input v-model="user_login.username" type="text" placeholder="Username"></input>
+                    <input v-model="user_login.username" type="text" placeholder="Username" id="input_name"></input>
                 </div>
                 <div class="input-field">
                     <i class="fas fa-lock"></i>
-                    <input v-model="user_login.password" type="password" placeholder="Password"></input>
+                    <input v-model="user_login.password" type="password" placeholder="Password" id="input_password"></input>
+                </div>
+                <div>
+                    <el-checkbox v-model="user_login.check">Remember Me</el-checkbox>
                 </div>
                 <input type="submit" value="Login" class="btn solid" @click="login()"></input>
             </form>
@@ -104,13 +107,13 @@
                         _this.$message({
                             message: '登录成功',
                             type: 'success'});
-
                         window.location.href="ElementBrand.html"
                     } else {
                         _this.$message({
                             message: '账号或密码错误',
                             type: 'warning'
                         });
+                        this.user_login.check = false;
                     }
                 })
             },
@@ -125,7 +128,6 @@
                     this.$message.error('请输入验证码');
                     return;
                 }
-
                 if (!this.usernameRegister){
                     this.$message.error("用户名仅能包含[A-Z][a-z][0-9][- _] 5-16位");
                 }else if (!this.passwordRegister){
@@ -142,12 +144,9 @@
                                 message: '注册成功',
                                 type: 'success'
                             });
-
                             _this.user_register.username = '';
                             _this.user_register.password = '';
                             _this.user_register.checkCode= '';
-
-
                         } else if (resp.data === "checkCode Fail") {
                             _this.$message({
                                 message: '验证码错误请重试',
@@ -163,7 +162,6 @@
                         }
                     })
                 }
-
             },
             userNameJust(){
                 let patten = /[a-zA-Z0-9_]{4,15}/g;
@@ -179,8 +177,8 @@
                 }
             },
             passwordJust(){
-                let patten = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}/g;
-                if (!patten.test(this.user_register.username))
+                let patten = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]){8,16}/g;
+                if (!patten.test(this.user_register.password))
                 {
                     this.$message({
                         message: '9-17位密码密码同时包含大小写、数字、字符(,.!@#)',
@@ -203,7 +201,8 @@
                 checkCode: '',
                 user_login: {
                     username: '',
-                    password: ''
+                    password: '',
+                    check: false
                 },
                 user_register: {
                     username: '',
@@ -222,6 +221,11 @@
         document.getElementById("checkCodeImg").src = "/brand-demo-aiox/User/checkCode?" + new Date().getMilliseconds();
     }
 
+    function autoFill()
+    {
+        alert(document.cookie);
+        document.getElementById("input_name").value = this.cookie.username.value;
+    }
 </script>
 
 </body>

@@ -6,11 +6,23 @@ public class User {
     private String username;
     private String password;
     private String checkCode;
+    private boolean check;
 
-    public User(String username, String password, String checkCode) {
+    public User(){
+
+    }
+    public User(String username, String password, String checkCode, boolean check) {
         this.username = username;
         this.password = password;
         this.checkCode = checkCode;
+        this.check = check;
+    }
+    public boolean isCheck() {
+        return check;
+    }
+
+    public void setCheck(boolean check) {
+        this.check = check;
     }
     public String getCheckCode() {
         return checkCode;
