@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
  * 替换HttpServlet,根据最后一段路径来进行方法分发
  * 反射的知识！！！！
  */
+
 public class BaseServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
